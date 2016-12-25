@@ -5,6 +5,34 @@ devapp.controller('main-controller', ['$scope', '$timeout', function($scope, $ti
 
     $scope.tableMode = "FixedResizer";
 
+    $scope.columns = [
+        {
+            id:"colName",
+            label: "Name",
+            class:""
+        },
+        {
+            id:"colStatus",
+            label: "Status",
+            class:"four wide"
+        },
+        {
+            id:"colNotes",
+            label: "Notes",
+            class:"four wide"
+        },
+        {
+            id:"colMore",
+            label: "More",
+            class:"two wide"
+        },
+        {
+            id:"colEvenMore",
+            label: "Even More",
+            class:"one wide"
+        }
+    ];
+
     var i = 1;
 
     $timeout(function() {

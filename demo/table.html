@@ -2,7 +2,8 @@
 <table resizeable mode="tableMode" class="ui single line unstackable selectable fixed compact torrent table" id="myTable">
     <thead>
         <tr>
-            <th id="colName">Name</th>
+            <th resizeable-column ng-repeat="column in columns" id="{{column.id}}" class="{{column.class}}">{{columns.label}}</th>
+<!--            <th id="colName">Name</th>
             <th id="colStatus" class="four wide">
                 Status</th>
             <th id="colNotes" class="four wide">
@@ -10,7 +11,7 @@
             <th id="colMore" class="two wide">
                 More</th>
             <th id="colEvenMore" class="one wide">
-                Even More</th>
+                Even More</th>-->
         </tr>
     </thead>
     <tbody>

@@ -25,7 +25,7 @@ const DIST = './dist/';
 
 gulp.task('serve', function() {
     browsersync.init({
-        port: 3001,
+        port: 3002,
         server: {
             baseDir: "./"
         }
