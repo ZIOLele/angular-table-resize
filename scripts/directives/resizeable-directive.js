@@ -48,9 +48,11 @@ angular.module("ngTableResize").directive('resizeable', ['resizeStorage', '$inje
     function watchModeChange(table, attr, scope) {
         scope.$watch(function() {
             return scope.mode;
-        }, function(/*newMode*/) {
-            cleanUpAll(table);
-            initialiseAll(table, attr, scope);
+        }, function(newMode) {
+            if(newMode){
+                cleanUpAll(table);
+                initialiseAll(table, columns, attr, scope);
+            }
         });
     }
 
@@ -248,6 +250,22 @@ angular.module("ngTableResize").directive('resizeable', ['resizeStorage', '$inje
     return {
         restrict: 'A',
         link: link,
+        controller: function(){
+            this.saveColumnSizes = saveColumnSizes;
+            this.unbindEvent = unbindEvent;
+            this.getResizer = getResizer;
+            this.calculateWidthEvent = calculateWidthEvent;
+            this.bindEventToHandle = bindEventToHandle;
+            this.initHandle = initHandle;
+            this.setColumnSizes = setColumnSizes;
+            this.initialiseAll = initialiseAll;
+            this.addColumn = addColumn;
+            this.deleteHandles = deleteHandles;
+            this.resetTable = resetTable;
+            this.cleanUpAll = cleanUpAll;
+            this.watchModeChange = watchModeChange;
+            this.bindUtilityFunctions = bindUtilityFunctions;
+        },
         scope: {
             mode: '=',
             bind: '=',
@@ -260,11 +278,13 @@ angular.module("ngTableResize").directive('resizeable', ['resizeStorage', '$inje
 angular.module("ngTableResize").directive('resizeableColumn', [ function() {
     return {
         restrict: 'A',
-        link: function(scope, element, attrs, resizeableController){
-            resizeableController.addColumn(this);
+        link: function(scope, element, attrs, controllers){
+            //var isResizeable = !(angular.lowercase(attrs.resizeableColumn) == "false") || true; 
+            //if(isResizeable)
+                controllers.resizeableController.addColumn(element[0]);
         },
         require: {
-            resizeableController : '^resizeable'    
+            resizeableController : '^^resizeable'    
         }
     }
 }]);

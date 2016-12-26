@@ -9,15 +9,18 @@ angular.module("ngTableResize").directive('resizeable', ['resizeStorage', '$inje
     var handleColumns = null;
     var table = null;
     var container = null;
+    var localAttr = null;
     var resizer = null;
     var isFirstDrag = true;
+    var localScope = null;
 
     var cache = null;
 
     function link(scope, element, attr) {
         // Set global reference to table
         table = element;
-
+        localScope = scope;
+        localAttr = attr;
         // Set global reference to container
         container = scope.container ? $(scope.container) : $(table).parent();
 
@@ -25,7 +28,7 @@ angular.module("ngTableResize").directive('resizeable', ['resizeStorage', '$inje
         $(table).addClass('resize');
 
         // Initialise handlers, bindings and modes
-        initialiseAll(table, attr, scope);
+        initialiseAll(table, undefined, attr, scope);
 
         // Bind utility functions to scope object
         bindUtilityFunctions(table, attr, scope)
@@ -47,15 +50,18 @@ angular.module("ngTableResize").directive('resizeable', ['resizeStorage', '$inje
     function watchModeChange(table, attr, scope) {
         scope.$watch(function() {
             return scope.mode;
-        }, function(/*newMode*/) {
-            cleanUpAll(table);
-            initialiseAll(table, attr, scope);
+        }, function(newMode) {
+            if(newMode){
+                cleanUpAll(table);
+                initialiseAll(table, columns, attr, scope);
+            }
         });
     }
 
     function cleanUpAll(table) {
         isFirstDrag = true;
         deleteHandles(table);
+
     }
 
     function resetTable(table) {
@@ -67,9 +73,18 @@ angular.module("ngTableResize").directive('resizeable', ['resizeStorage', '$inje
         $(table).find('th').find('.handle').remove();
     }
 
-    function initialiseAll(table, attr, scope) {
+    function addColumn(col) {
+        columns.push(col);
+        cleanUpAll(table);
+        initialiseAll(table,columns,localAttr,localScope);
+    }
+
+    function initialiseAll(table, cols, attr, scope) {
         // Get all column headers
-        columns = $(table).find('th');
+        if(!cols)
+            columns = $(table).find('th');
+        else
+            columns = cols
 
         mode = scope.mode;
 
@@ -237,6 +252,22 @@ angular.module("ngTableResize").directive('resizeable', ['resizeStorage', '$inje
     return {
         restrict: 'A',
         link: link,
+        controller: function(){
+            this.saveColumnSizes = saveColumnSizes;
+            this.unbindEvent = unbindEvent;
+            this.getResizer = getResizer;
+            this.calculateWidthEvent = calculateWidthEvent;
+            this.bindEventToHandle = bindEventToHandle;
+            this.initHandle = initHandle;
+            this.setColumnSizes = setColumnSizes;
+            this.initialiseAll = initialiseAll;
+            this.addColumn = addColumn;
+            this.deleteHandles = deleteHandles;
+            this.resetTable = resetTable;
+            this.cleanUpAll = cleanUpAll;
+            this.watchModeChange = watchModeChange;
+            this.bindUtilityFunctions = bindUtilityFunctions;
+        },
         scope: {
             mode: '=',
             bind: '=',
@@ -246,6 +277,19 @@ angular.module("ngTableResize").directive('resizeable', ['resizeStorage', '$inje
 
 }]);
 
+angular.module("ngTableResize").directive('resizeableColumn', [ function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs, controllers){
+            //var isResizeable = !(angular.lowercase(attrs.resizeableColumn) == "false") || true; 
+            //if(isResizeable)
+                controllers.resizeableController.addColumn(element[0]);
+        },
+        require: {
+            resizeableController : '^^resizeable'    
+        }
+    }
+}]);
 angular.module("ngTableResize").service('resizeStorage', ['$window', function($window) {
 
     var prefix = "ngColumnResize";
